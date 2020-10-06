@@ -1,5 +1,6 @@
 # KakfaElasticDemo
 
+This demo uses confluence docker images to run a single node Elasticsearch container that is run as a sink for Kafka. A Maven Scala worker pushes data into Kafka where a kafka-connector container pulls it into Elasticsearch
 
 ## Running Demo
 
@@ -226,7 +227,7 @@
 
 ## Other Useful Commands
 
-  1. ~Probably don't do this to a production system~ Purging data from Kafka (but not Elasticsearch) requires updating the retention period to something very short, and then changing back, e.g.
+  1. Probably don't do this to a production system...Purging data from Kafka (but not Elasticsearch) requires updating the retention period to something very short, and then changing back, e.g.
   ```
   docker exec -it kafka kafka-configs --bootstrap-server kafka:29092 --entity-type topics --alter --entity-name test_topic --add-config retention.ms=1000
   ```
