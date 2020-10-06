@@ -2,3 +2,4 @@
 *.DS_Store
 *cfpb_complaints.csv
 *cfpb_complaints_clean.csv
+*cfpb_complaints_clean_v2.csv

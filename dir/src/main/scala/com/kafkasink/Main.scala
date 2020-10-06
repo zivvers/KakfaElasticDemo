@@ -41,38 +41,6 @@ import org.json4s.native.JsonMethods._
 
 
 
-
-/*
-class KafkaSend extends App with Actor {
-	private val fileName : String = "cfpb_complaints.csv"
-
-	//implicit val materializer: ActorMaterializer = ActorMaterializer()
-	//implicit val refFactory : ActorRefFactory = ActorRefFactory()
-	implicit val sys = context.system
-
-  	implicit val mat = ActorMaterializer()(context)
-
-  	val log = Logging(sys, this)
-	
-	def readFile(fileName : String) : Unit = {
-			val source = FileIO.fromPath( Paths.get( getClass.getResource("/cfpb_complaints.csv").getPath ))
-							.via(CsvParsing.lineScanner())
-  							.via(CsvToMap.toMapAsStrings(StandardCharsets.UTF_8))
-  							.runForeach(println)
-
-  	}
-
-  	def receive = {
-    	case "test" => log.info("received test")
-    	case _      => log.info("received unknown message")
-  	}
-
-
-}
-*/
-
-
-
 object Main extends App {
 
 
@@ -93,26 +61,22 @@ object Main extends App {
 
 
 	
-	val future: Future[Done] = //FileIO.fromPath( Paths.get( getClass.getResource("/test.rtf").getPath ))
-							FileIO.fromPath(Paths.get("/usr/src/app/KafkaElasticSink/src/resources/cfpb_complaints_cut.csv"))
+	val future: Future[Done] = FileIO.fromPath(Paths.get("/usr/src/app/KafkaElasticSink/src/resources/cfpb_complaints_cut.csv"))
 							.via(CsvParsing.lineScanner())
 							.via(CsvToMap.toMap())
 							.map( _.mapValues(_.utf8String) )
 							.map(elem => {  var elemUpd = elem
-											if (elemUpd("location") == "[None, None]") {
+											if (elemUpd("location") == "") {
 												
-												elemUpd-("location") // remove from map!
-
-											} else {
-											 	val cleanLoc = elemUpd("location").stripPrefix("[").stripSuffix("]").trim
-											 	elemUpd = elemUpd + ("location" -> cleanLoc)
+												elemUpd = elemUpd-("location") // remove from map!
 											}
-											  elemUpd
+											else { println(elemUpd("location"))}
+											elemUpd
 											}) 
 
-							.map((elem : Map[String, String]) => { println(elem); ( elem("complaint_id"), write(elem) ) })
+							.map((elem : Map[String, String]) => { /*println(elem); */( elem("complaint_id"), write(elem) ) })
 							//.runForeach(println)
-							.map(elem => new ProducerRecord[String, String]("test_topic",  elem._1, elem._2)) // provide key value using complaint_id
+							.map(elem => { println(elem._2); new ProducerRecord[String, String]("test_topic",  elem._1, elem._2) }) // provide key value using complaint_id
 							.runWith(Producer.plainSink(producerSettings))
 							
   						
